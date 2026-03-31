@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>大向智行 · 管理系统</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand-deep:    #0A1628;
+      --brand-navy:    #0D2347;
+      --brand-accent:  #2B7FFF;
+      --brand-accent-hover: #1A6FE8;
+      --brand-teal:    #00C9B1;
+      --brand-gold:    #F5A623;
+      --brand-danger:  #FF4D4F;
+      --brand-success: #52C41A;
+
+      --bg-page:       #F0F4FA;
+      --bg-card:       #FFFFFF;
+      --bg-sidebar:    #0A1628;
+      --bg-header:     #FFFFFF;
+
+      --text-primary:  #1A2340;
+      --text-secondary:#5A6A8A;
+      --text-muted:    #9AAAC0;
+      --text-white:    #FFFFFF;
+
+      --border:        #E2E8F4;
+      --border-light:  #F0F4FA;
+      --shadow-sm:     0 2px 8px rgba(10,22,40,.06);
+      --shadow-md:     0 6px 24px rgba(10,22,40,.10);
+      --shadow-lg:     0 16px 48px rgba(10,22,40,.16);
+
+      --radius-sm:     6px;
+      --radius-md:     10px;
+      --radius-lg:     14px;
+      --radius-full:   50%;
+
+      --font:          'Noto Sans SC', -apple-system, sans-serif;
+      --transition:    .22s cubic-bezier(.4,0,.2,1);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .admin-layout { display: flex; height: 100vh; }
+
+    /* ====== Sidebar ====== */
+    .sidebar {
+      width: 220px;
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .logo {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--brand-accent), var(--brand-teal));
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; margin-right: 10px; flex-shrink: 0;
+    }
+    .logo-text { font-size: 14px; font-weight: 600; color: #fff; line-height: 1.3; }
+    .logo-sub  { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 1px; }
+
+    .nav-menu { flex: 1; padding: 10px 10px; overflow-y: auto; }
+
+    /* 一级菜单项 */
+    .nav-item-l1 {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 10px; border-radius: var(--radius-sm);
+      color: rgba(255,255,255,.65); font-size: 13px;
+      cursor: pointer; transition: var(--transition);
+      user-select: none;
+    }
+    .nav-item-l1:hover { background: rgba(255,255,255,.06); color: #fff; }
+    .nav-item-l1.active { background: rgba(43,127,255,.18); color: var(--brand-accent); }
+    .nav-item-l1 .ni-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+    .nav-item-l1 .ni-arrow {
+      margin-left: auto; font-size: 10px; color: rgba(255,255,255,.3);
+      transition: transform .2s;
+    }
+    .nav-item-l1.open .ni-arrow { transform: rotate(90deg); color: rgba(255,255,255,.6); }
+
+    /* 二级菜单 */
+    .nav-sub {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .28s ease;
+    }
+    .nav-sub.open { max-height: 400px; }
+    .nav-item-l2 {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px 8px 32px; border-radius: var(--radius-sm);
+      color: rgba(255,255,255,.5); font-size: 12px;
+      cursor: pointer; transition: var(--transition);
+    }
+    .nav-item-l2:hover { background: rgba(255,255,255,.05); color: rgba(255,255,255,.8); }
+    .nav-item-l2.active { background: rgba(43,127,255,.2); color: var(--brand-accent); }
+    .nav-item-l2 .ni-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    .sidebar-footer { padding: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+    .admin-info { display: flex; align-items: center; gap: 10px; }
+    .admin-avatar {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: var(--radius-full);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px; font-weight: 600;
+    }
+    .admin-name { font-size: 13px; color: #fff; font-weight: 500; }
+    .admin-role { font-size: 11px; color: rgba(255,255,255,.4); }
+
+    /* ====== Main ====== */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .header {
+      height: 64px; background: var(--bg-header);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; flex-shrink: 0;
+    }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
+    .breadcrumb-current { color: var(--text-primary); font-weight: 600; font-size: 16px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .header-btn {
+      width: 38px; height: 38px; border: none;
+      background: var(--bg-page); border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 17px;
+    }
+    .header-btn:hover { background: var(--border); }
+
+    .content { flex: 1; padding: 24px; overflow-y: auto; }
+
+    /* ====== Shared ====== */
+    .table-card { background: var(--bg-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .table-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+    .table-title { font-size: 15px; font-weight: 600; }
+    .table-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .table-search { display: flex; align-items: center; gap: 8px; background: var(--bg-page); padding: 8px 12px; border-radius: var(--radius-sm); min-width: 200px; }
+    .table-search input { border: none; background: none; outline: none; font-size: 13px; width: 100%; font-family: var(--font); }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th { text-align: left; padding: 12px 20px; font-size: 12px; font-weight: 600; color: var(--text-muted); background: var(--bg-page); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .table td { padding: 14px 20px; font-size: 13px; border-bottom: 1px solid var(--border-light); }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover td { background: rgba(43,127,255,.02); }
+
+    .tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 500; }
+    .tag.success { background: rgba(82,196,26,.1); color: var(--brand-success); }
+    .tag.warning { background: rgba(245,166,35,.1); color: var(--brand-gold); }
+    .tag.danger  { background: rgba(255,77,79,.1);  color: var(--brand-danger); }
+    .tag.info    { background: rgba(43,127,255,.1); color: var(--brand-accent); }
+    .tag.muted   { background: rgba(154,170,192,.15); color: var(--text-muted); }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: var(--transition); border: none; font-family: var(--font); }
+    .btn-primary   { background: var(--brand-accent); color: #fff; }
+    .btn-primary:hover { background: var(--brand-accent-hover); }
+    .btn-secondary { background: var(--bg-page); color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--brand-accent); color: var(--brand-accent); }
+    .btn-danger    { background: rgba(255,77,79,.1); color: var(--brand-danger); border: 1px solid rgba(255,77,79,.2); }
+    .btn-danger:hover { background: rgba(255,77,79,.2); }
+    .btn-sm { padding: 5px 11px; font-size: 12px; }
+
+    /* ====== Screen ====== */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ====== KB Doc List ====== */
+    .doc-grid { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .doc-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--bg-page); border-radius: var(--radius-md); transition: var(--transition); }
+    .doc-item:hover { background: rgba(43,127,255,.04); }
+    .doc-icon { width: 44px; height: 44px; background: var(--bg-card); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; box-shadow: var(--shadow-sm); }
+    .doc-info { flex: 1; min-width: 0; }
+    .doc-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .doc-meta { display: flex; align-items: center; gap: 12px; margin-top: 5px; flex-wrap: wrap; }
+    .doc-meta-item { font-size: 11px; color: var(--text-muted); }
+    .doc-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+    .doc-tag { font-size: 11px; background: rgba(43,127,255,.08); color: var(--brand-accent); padding: 2px 8px; border-radius: 100px; }
+    .doc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* Status badge */
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+    .status-dot.ready   { background: var(--brand-success); }
+    .status-dot.pending { background: var(--brand-gold); }
+    .status-dot.error   { background: var(--brand-danger); }
+
+    /* ====== Tag List (改为列表形式) ====== */
+    .tag-list-wrap { padding: 0 20px 20px; }
+    .tag-list-search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-page); padding: 9px 14px;
+      border-radius: var(--radius-sm); margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+    .tag-list-search input { border: none; background: none; outline: none; font-size: 13px; flex: 1; font-family: var(--font); }
+
+    /* ====== Settings Tabs ====== */
+    .settings-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 20px; background: var(--bg-card); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+    .settings-tab { padding: 14px 18px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: var(--transition); }
+    .settings-tab:hover { color: var(--brand-accent); }
+    .settings-tab.active { color: var(--brand-accent); border-bottom-color: var(--brand-accent); }
+    .settings-panel { display: none; background: var(--bg-card); border-radius: 0 0 var(--radius-lg) var(--radius-lg); box-shadow: var(--shadow-sm); }
+    .settings-panel.active { display: block; }
+    .settings-body { padding: 24px; max-width: 600px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-primary); }
+    .form-hint  { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .form-input    { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font); transition: var(--transition); }
+    .form-input:focus  { outline: none; border-color: var(--brand-accent); box-shadow: 0 0 0 3px rgba(43,127,255,.1); }
+    .form-textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font); min-height: 100px; resize: vertical; transition: var(--transition); }
+    .form-textarea:focus { outline: none; border-color: var(--brand-accent); box-shadow: 0 0 0 3px rgba(43,127,255,.1); }
+    .form-select   { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font); background: #fff; transition: var(--transition); }
+    .form-select:focus { outline: none; border-color: var(--brand-accent); }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+    /* 客服头像上传 */
+    .avatar-upload-row { display: flex; align-items: flex-start; gap: 16px; }
+    .avatar-preview {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 2px solid var(--border);
+      overflow: hidden; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #f8fffe;
+    }
+    .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-upload-actions { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(10,22,40,.6); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--bg-card); border-radius: var(--radius-lg); width: 100%; max-width: 560px; max-height: 90vh; overflow: hidden; box-shadow: var(--shadow-lg); transform: scale(.95); transition: transform .2s ease; }
+    .modal-overlay.open .modal { transform: scale(1); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 16px; font-weight: 600; }
+    .modal-close { width: 32px; height: 32px; border: none; background: var(--bg-page); border-radius: var(--radius-sm); cursor: pointer; font-size: 16px; color: var(--text-secondary); }
+    .modal-close:hover { color: var(--text-primary); }
+    .modal-body { padding: 20px; overflow-y: auto; max-height: calc(90vh - 130px); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--border); background: var(--bg-page); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Toggle switch */
+    .toggle { position: relative; display: inline-block; width: 40px; height: 22px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); border-radius: 22px; transition: .3s; }
+    .toggle-slider:before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
+    .toggle input:checked + .toggle-slider { background: var(--brand-accent); }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+    /* ====== Tag Input（手动输入+AI补充）====== */
+    .tag-input-area {
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 8px 10px; min-height: 44px;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      cursor: text; transition: var(--transition);
+    }
+    .tag-input-area:focus-within { border-color: var(--brand-accent); box-shadow: 0 0 0 3px rgba(43,127,255,.1); }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(43,127,255,.1); color: var(--brand-accent);
+      padding: 3px 8px; border-radius: 100px; font-size: 12px; font-weight: 500;
+    }
+    .tag-chip-del { cursor: pointer; font-size: 12px; color: var(--brand-accent); opacity: .7; }
+    .tag-chip-del:hover { opacity: 1; }
+    .tag-chip.ai-gen {
+      background: rgba(0,201,177,.12); color: #00A896;
+      border: 1px dashed rgba(0,201,177,.4);
+    }
+    .tag-chip.ai-gen::before { content: "✨"; font-size: 10px; margin-right: 2px; }
+    .tag-text-input {
+      border: none; outline: none; font-size: 13px; font-family: var(--font);
+      min-width: 80px; flex: 1; background: transparent;
+    }
+    .ai-tag-hint {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 10px; background: rgba(0,201,177,.06);
+      border-radius: var(--radius-sm); border: 1px solid rgba(0,201,177,.2);
+      font-size: 12px; color: #00A896; margin-top: 6px;
+    }
+    .ai-tag-hint .spin { animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Preset tag selector */
+    .tag-preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .tag-option { padding: 3px 10px; border-radius: 100px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); color: var(--text-secondary); transition: var(--transition); user-select: none; }
+    .tag-option:hover   { border-color: var(--brand-accent); color: var(--brand-accent); }
+    .tag-option.selected { background: rgba(43,127,255,.1); border-color: var(--brand-accent); color: var(--brand-accent); }
+
+    .sync-info { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--bg-page); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .sync-info-text { font-size: 12px; color: var(--text-muted); }
+    .sync-info-text strong { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🚛</div>
+      <div>
+        <div class="logo-text">大向智行</div>
+        <div class="logo-sub">管理平台</div>
+      </div>
+    </div>
+    <nav class="nav-menu">
+
+      <!-- 首页 -->
+      <div class="nav-item-l1" onclick="showScreen('home',this)" id="l1-home">
+        <span class="ni-icon">🏠</span><span>首页</span>
+      </div>
+
+      <!-- 基础档案 -->
+      <div class="nav-item-l1" onclick="showScreen('archive',this)" id="l1-archive">
+        <span class="ni-icon">🗂️</span><span>基础档案</span>
+      </div>
+
+      <!-- 安全培训 -->
+      <div class="nav-item-l1" onclick="showScreen('training',this)" id="l1-training">
+        <span class="ni-icon">🦺</span><span>安全培训</span>
+      </div>
+
+      <!-- 运单调度 -->
+      <div class="nav-item-l1" onclick="showScreen('dispatch',this)" id="l1-dispatch">
+        <span class="ni-icon">📦</span><span>运单调度</span>
+      </div>
+
+      <!-- 智能客服（独立一级菜单） -->
+      <div class="nav-item-l1 open" id="l1-csvc" onclick="toggleL1('csvc')">
+        <span class="ni-icon">🤖</span><span>智能客服</span>
+        <span class="ni-arrow">▶</span>
+      </div>
+      <div class="nav-sub open" id="sub-csvc">
+        <div class="nav-item-l2 active" onclick="showScreen('questions',this)" id="l2-questions"><span class="ni-dot"></span>问答管理</div>
+        <div class="nav-item-l2" onclick="showScreen('knowledge',this)" id="l2-knowledge"><span class="ni-dot"></span>知识库管理</div>
+        <div class="nav-item-l2" onclick="showScreen('tags',this)" id="l2-tags"><span class="ni-dot"></span>分类管理</div>
+        <div class="nav-item-l2" onclick="showScreen('conversations',this)" id="l2-conversations"><span class="ni-dot"></span>会话记录</div>
+        <div class="nav-item-l2" onclick="showScreen('settings',this)" id="l2-settings"><span class="ni-dot"></span>客服设置</div>
+      </div>
+
+      <!-- 财务管理 -->
+      <div class="nav-item-l1" onclick="showScreen('finance',this)" id="l1-finance">
+        <span class="ni-icon">💰</span><span>财务管理</span>
+      </div>
+
+      <!-- 数据大屏 -->
+      <div class="nav-item-l1" onclick="showScreen('datascreen',this)" id="l1-datascreen">
+        <span class="ni-icon">📊</span><span>数据大屏</span>
+      </div>
+
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-info">
+        <div class="admin-avatar">管</div>
+        <div>
+          <div class="admin-name">管理员</div>
+          <div class="admin-role">超级管理员</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Main ===== -->
+  <main class="main">
+    <header class="header">
+      <div class="breadcrumb">
+        <span>大向智行</span>
+        <span>›</span>
+        <span id="breadModule">企业管理</span>
+        <span id="breadSep2">›</span>
+        <span id="breadSub">智能客服</span>
+        <span id="breadSep3">›</span>
+        <span class="breadcrumb-current" id="pageTitle">问答管理</span>
+      </div>
+      <div class="header-right">
+        <!-- 消息提醒已移除 -->
+        <button class="header-btn">👤</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ========== 首页仪表盘 ========== -->
+      <div class="screen" id="screen-home">
+        <div class="table-card" style="padding:60px 0;text-align:center;color:var(--text-muted)">
+          <div style="font-size:48px;margin-bottom:12px">🏠</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary)">首页</div>
+          <div style="font-size:13px;margin-top:6px">此处为首页仪表盘模块（原型展示区）</div>
+        </div>
+      </div>
+      <div class="screen" id="screen-archive">
+        <div class="table-card" style="padding:60px 0;text-align:center;color:var(--text-muted)">
+          <div style="font-size:48px;margin-bottom:12px">🗂️</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary)">基础档案</div>
+          <div style="font-size:13px;margin-top:6px">此处为基础档案模块（原型展示区）</div>
+        </div>
+      </div>
+      <div class="screen" id="screen-training">
+        <div class="table-card" style="padding:60px 0;text-align:center;color:var(--text-muted)">
+          <div style="font-size:48px;margin-bottom:12px">🦺</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary)">安全培训</div>
+          <div style="font-size:13px;margin-top:6px">此处为安全培训模块（原型展示区）</div>
+        </div>
+      </div>
+      <div class="screen" id="screen-dispatch">
+        <div class="table-card" style="padding:60px 0;text-align:center;color:var(--text-muted)">
+          <div style="font-size:48px;margin-bottom:12px">📦</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary)">运单调度</div>
+          <div style="font-size:13px;margin-top:6px">此处为运单调度模块（原型展示区）</div>
+        </div>
+      </div>
+      <div class="screen" id="screen-companyInfo">
+        <div class="table-card" style="padding:60px 0;text-align:center;color:var(--text-muted)">
+          <div style="font-size:48px;margin-bottom:12px">🏢</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary)">企业信息</div>
+        </div>
+      </div>
+      <div class="screen" id="screen-companyUser">
+        <div class="table-card" style="padding:60px 0;text-align:center;color:var(--text-muted)">
+          <div style="font-size:48px;margin-bottom:12px">👥</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary)">人员管理</div>
+        </div>
+      </div>
+      <div class="screen" id="screen-finance">
+        <div class="table-card" style="padding:60px 0;text-align:center;color:var(--text-muted)">
+          <div style="font-size:48px;margin-bottom:12px">💰</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary)">财务管理</div>
+          <div style="font-size:13px;margin-top:6px">此处为财务管理模块（原型展示区）</div>
+        </div>
+      </div>
+      <div class="screen" id="screen-datascreen">
+        <div class="table-card" style="padding:60px 0;text-align:center;color:var(--text-muted)">
+          <div style="font-size:48px;margin-bottom:12px">📊</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary)">数据大屏</div>
+          <div style="font-size:13px;margin-top:6px">此处为数据大屏模块（原型展示区）</div>
+        </div>
+      </div>
+
+      <!-- ========== 问答管理 ========== -->
+      <div class="screen active" id="screen-questions">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">问答管理</span>
+            <div class="table-actions">
+              <div class="table-search"><span>🔍</span><input type="text" placeholder="搜索问题..."></div>
+              <select style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);background:#fff;color:var(--text-secondary)">
+                <option value="">全部分类</option>
+                <option>安全培训</option>
+                <option>保险业务</option>
+                <option>银行贷款</option>
+                <option>车队管理</option>
+                <option>车后市场</option>
+                <option>政策解读</option>
+              </select>
+              <button class="btn btn-primary" onclick="openModal('addQuestion')">＋ 添加问答</button>
+            </div>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>问题</th>
+                <th>分类</th>
+                <th>咨询次数</th>
+                <th>更新时间</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="max-width:280px">
+                  <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">保险理赔申请需要什么材料？</div>
+                  <div style="font-size:11px;color:var(--text-muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">包含报案、现场取证、提交材料、定损核查、赔款到账的完整流程...</div>
+                </td>
+                <td><span class="tag info">保险业务</span></td>
+                <td>3,245</td>
+                <td>2026-03-20</td>
+                <td><span class="tag success">启用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="max-width:280px">
+                  <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">安全培训在哪里报名？</div>
+                  <div style="font-size:11px;color:var(--text-muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">培训课程选择、报名资料提交、缴费方式、审核流程等操作指引...</div>
+                </td>
+                <td><span class="tag" style="background:rgba(82,196,26,.1);color:#52C41A">安全培训</span></td>
+                <td>2,891</td>
+                <td>2026-03-18</td>
+                <td><span class="tag success">启用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="max-width:280px">
+                  <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">贷款需要什么条件和材料？</div>
+                  <div style="font-size:11px;color:var(--text-muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">车辆抵押贷、信用经营贷、车队运营贷的利率范围与申请条件...</div>
+                </td>
+                <td><span class="tag warning">银行贷款</span></td>
+                <td>2,156</td>
+                <td>2026-03-15</td>
+                <td><span class="tag success">启用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="max-width:280px">
+                  <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">车辆年检可以在系统里预约吗？</div>
+                  <div style="font-size:11px;color:var(--text-muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">车辆调度、运营分析、合规管理、司机管理等核心功能说明...</div>
+                </td>
+                <td><span class="tag" style="background:rgba(0,201,177,.1);color:#00A896">车队管理</span></td>
+                <td>1,892</td>
+                <td>2026-03-10</td>
+                <td><span class="tag success">启用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="max-width:280px">
+                  <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">维修保养怎么预约？</div>
+                  <div style="font-size:11px;color:var(--text-muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">维修保养、配件采购、服务预约流程说明...</div>
+                </td>
+                <td><span class="tag" style="background:rgba(102,126,234,.12);color:#6B5FD4">车后市场</span></td>
+                <td>1,654</td>
+                <td>2026-03-08</td>
+                <td><span class="tag muted">禁用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== 知识库管理 ========== -->
+      <div class="screen" id="screen-knowledge">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">知识库管理</span>
+            <div class="table-actions">
+              <div class="table-search"><span>🔍</span><input type="text" placeholder="搜索文档..."></div>
+              <select style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);background:#fff;color:var(--text-secondary)">
+                <option>全部分类</option>
+                <option>安全培训</option>
+                <option>保险业务</option>
+                <option>银行贷款</option>
+                <option>车队管理</option>
+                <option>车后市场</option>
+                <option>政策解读</option>
+              </select>
+              <!-- ↓ 右上角改为"查找"按钮 -->
+              <button class="btn btn-secondary" onclick="openModal('searchDoc')">🔎 查找</button>
+              <button class="btn btn-primary" onclick="openModal('uploadDoc')">⬆ 上传文档</button>
+            </div>
+          </div>
+
+          <!-- Doc List -->
+          <div style="padding:0 16px 4px 16px;border-top:1px solid var(--border)">
+            <div style="padding:12px 0;font-size:12px;color:var(--text-muted)">共 4 个文档 · <span style="color:var(--brand-success)">2 已就绪</span> · <span style="color:var(--brand-gold)">1 处理中</span> · <span style="color:var(--brand-danger)">1 处理失败</span></div>
+          </div>
+          <div class="doc-grid" style="padding-top:0">
+            <div class="doc-item">
+              <div class="doc-icon">📄</div>
+              <div class="doc-info">
+                <div class="doc-name">保险理赔操作手册V2.pdf</div>
+                <div class="doc-meta">
+                  <span class="doc-meta-item">📎 PDF</span>
+                  <span class="doc-meta-item">2.3 MB</span>
+                  <span class="doc-meta-item">🕐 2026-03-20 上传</span>
+                  <span class="doc-meta-item"><span class="status-dot ready"></span>已就绪</span>
+                </div>
+                <div class="doc-tags"><span class="doc-tag">保险业务</span></div>
+              </div>
+              <div class="doc-actions">
+                <button class="btn btn-sm btn-secondary">预览</button>
+                <button class="btn btn-sm btn-danger">删除</button>
+              </div>
+            </div>
+            <div class="doc-item">
+              <div class="doc-icon">📊</div>
+              <div class="doc-info">
+                <div class="doc-name">2026安全培训课程目录.xlsx</div>
+                <div class="doc-meta">
+                  <span class="doc-meta-item">📎 Excel</span>
+                  <span class="doc-meta-item">0.8 MB</span>
+                  <span class="doc-meta-item">🕐 2026-03-18 上传</span>
+                  <span class="doc-meta-item"><span class="status-dot ready"></span>已就绪</span>
+                </div>
+                <div class="doc-tags"><span class="doc-tag">安全培训</span></div>
+              </div>
+              <div class="doc-actions">
+                <button class="btn btn-sm btn-secondary">下载</button>
+                <button class="btn btn-sm btn-danger">删除</button>
+              </div>
+            </div>
+            <div class="doc-item">
+              <div class="doc-icon">📝</div>
+              <div class="doc-info">
+                <div class="doc-name">贷款产品政策说明.docx</div>
+                <div class="doc-meta">
+                  <span class="doc-meta-item">📎 Word</span>
+                  <span class="doc-meta-item">1.2 MB</span>
+                  <span class="doc-meta-item">🕐 2026-03-15 上传</span>
+                  <span class="doc-meta-item"><span class="status-dot pending"></span>处理中...</span>
+                </div>
+                <div class="doc-tags"><span class="doc-tag">银行贷款</span></div>
+              </div>
+              <div class="doc-actions">
+                <button class="btn btn-sm btn-secondary" disabled style="opacity:.5;cursor:not-allowed">预览</button>
+                <button class="btn btn-sm btn-danger">删除</button>
+              </div>
+            </div>
+            <div class="doc-item">
+              <div class="doc-icon">🖥️</div>
+              <div class="doc-info">
+                <div class="doc-name">车队管理系统使用指南.pptx</div>
+                <div class="doc-meta">
+                  <span class="doc-meta-item">📎 PPT</span>
+                  <span class="doc-meta-item">5.6 MB</span>
+                  <span class="doc-meta-item">🕐 2026-03-10 上传</span>
+                  <span class="doc-meta-item"><span class="status-dot error"></span>处理失败</span>
+                </div>
+                <div class="doc-tags"><span class="doc-tag">车队管理</span></div>
+              </div>
+              <div class="doc-actions">
+                <button class="btn btn-sm btn-secondary">重新处理</button>
+                <button class="btn btn-sm btn-danger">删除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 分类管理 ========== -->
+      <div class="screen" id="screen-tags">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">分类管理</span>
+            <div class="table-actions">
+              <button class="btn btn-primary" onclick="openModal('addTag')">＋ 新增分类</button>
+            </div>
+          </div>
+          <div style="padding:12px 20px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted)">
+            分类同时适用于「问答管理」和「知识库管理」，也会在移动端客服首页展示为快捷入口
+          </div>
+
+          <!-- 列表表格 -->
+          <table class="table" id="tagTable">
+            <thead>
+              <tr>
+                <th>分类名称</th>
+                <th>图标</th>
+                <th>关联问答数</th>
+                <th>关联文档数</th>
+                <th>移动端展示</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tagTableBody">
+              <tr data-name="安全培训">
+                <td style="font-weight:600">安全培训</td>
+                <td>🦺</td>
+                <td>45</td>
+                <td>3</td>
+                <td><span class="tag success">展示</span></td>
+                <td><span class="tag success">启用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-name="保险业务">
+                <td style="font-weight:600">保险业务</td>
+                <td>🛡️</td>
+                <td>62</td>
+                <td>5</td>
+                <td><span class="tag success">展示</span></td>
+                <td><span class="tag success">启用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-name="银行贷款">
+                <td style="font-weight:600">银行贷款</td>
+                <td>🏦</td>
+                <td>38</td>
+                <td>2</td>
+                <td><span class="tag success">展示</span></td>
+                <td><span class="tag success">启用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-name="车队管理">
+                <td style="font-weight:600">车队管理</td>
+                <td>🚛</td>
+                <td>28</td>
+                <td>4</td>
+                <td><span class="tag success">展示</span></td>
+                <td><span class="tag success">启用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-name="车后市场">
+                <td style="font-weight:600">车后市场</td>
+                <td>🔧</td>
+                <td>33</td>
+                <td>1</td>
+                <td><span class="tag muted">隐藏</span></td>
+                <td><span class="tag success">启用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-name="政策解读">
+                <td style="font-weight:600">政策解读</td>
+                <td>📋</td>
+                <td>21</td>
+                <td>2</td>
+                <td><span class="tag muted">隐藏</span></td>
+                <td><span class="tag muted">禁用</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-secondary">编辑</button>
+                    <button class="btn btn-sm btn-danger">删除</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== 会话记录 ========== -->
+      <div class="screen" id="screen-conversations">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">会话记录</span>
+            <div class="table-actions" style="flex-wrap:wrap;gap:8px">
+              <div class="table-search"><span>🔍</span><input type="text" placeholder="搜索用户问题..."></div>
+              <!-- 日期范围搜索 -->
+              <div style="display:flex;align-items:center;gap:6px;background:var(--bg-page);padding:7px 12px;border-radius:var(--radius-sm);border:1px solid var(--border)">
+                <span style="font-size:13px;color:var(--text-muted)">📅</span>
+                <input type="date" id="dateStart" value="2026-03-30"
+                  style="border:none;background:none;outline:none;font-size:13px;font-family:var(--font);color:var(--text-primary);cursor:pointer;width:118px">
+                <span style="font-size:12px;color:var(--text-muted)">至</span>
+                <input type="date" id="dateEnd" value="2026-03-30"
+                  style="border:none;background:none;outline:none;font-size:13px;font-family:var(--font);color:var(--text-primary);cursor:pointer;width:118px">
+                <button onclick="filterConvByDate()" class="btn btn-primary btn-sm" style="margin-left:2px;padding:4px 10px;font-size:12px">查询</button>
+              </div>
+              <select style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);background:#fff;color:var(--text-secondary)">
+                <option>全部状态</option>
+                <option>已解决</option>
+                <option>转人工</option>
+                <option>未解决</option>
+              </select>
+              <button class="btn btn-secondary">⬇ 导出</button>
+            </div>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>会话ID</th>
+                <th>用户</th>
+                <th>首条问题</th>
+                <th>状态</th>
+                <th>耗时</th>
+                <th>时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="convTableBody">
+              <tr data-date="2026-03-30">
+                <td style="font-size:12px;color:var(--text-muted)">20260330001</td>
+                <td>用户***8</td>
+                <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">保险理赔流程是怎样的？</td>
+                <td><span class="tag success">已解决</span></td>
+                <td>1m 23s</td>
+                <td>2026-03-30 09:42</td>
+                <td><button class="btn btn-sm btn-secondary" onclick="openModal('chatDetail')">查看</button></td>
+              </tr>
+              <tr data-date="2026-03-30">
+                <td style="font-size:12px;color:var(--text-muted)">20260330002</td>
+                <td>用户***3</td>
+                <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">贷款申请条件有哪些？</td>
+                <td><span class="tag success">已解决</span></td>
+                <td>2m 15s</td>
+                <td>2026-03-30 09:38</td>
+                <td><button class="btn btn-sm btn-secondary" onclick="openModal('chatDetail')">查看</button></td>
+              </tr>
+              <tr data-date="2026-03-30">
+                <td style="font-size:12px;color:var(--text-muted)">20260330003</td>
+                <td>用户***7</td>
+                <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">培训报名在哪里操作？</td>
+                <td><span class="tag warning">转人工</span></td>
+                <td>3m 45s</td>
+                <td>2026-03-30 09:25</td>
+                <td><button class="btn btn-sm btn-secondary" onclick="openModal('chatDetail')">查看</button></td>
+              </tr>
+              <tr data-date="2026-03-29">
+                <td style="font-size:12px;color:var(--text-muted)">20260329001</td>
+                <td>用户***1</td>
+                <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">车辆年检可以预约吗？</td>
+                <td><span class="tag success">已解决</span></td>
+                <td>56s</td>
+                <td>2026-03-29 14:10</td>
+                <td><button class="btn btn-sm btn-secondary" onclick="openModal('chatDetail')">查看</button></td>
+              </tr>
+              <tr data-date="2026-03-29">
+                <td style="font-size:12px;color:var(--text-muted)">20260329002</td>
+                <td>用户***5</td>
+                <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">车队管理功能怎么用？</td>
+                <td><span class="tag danger">未解决</span></td>
+                <td>4m 20s</td>
+                <td>2026-03-29 11:55</td>
+                <td><button class="btn btn-sm btn-secondary" onclick="openModal('chatDetail')">查看</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ========== 客服设置 ========== -->
+      <div class="screen" id="screen-settings">
+        <div class="settings-tabs">
+          <div class="settings-tab active" onclick="showSettingsTab('hotlines',this)">📞 客服热线</div>
+          <div class="settings-tab" onclick="showSettingsTab('sysset',this)">⚙️ 系统设置</div>
+        </div>
+
+        <!-- 客服热线 Panel -->
+        <div class="settings-panel active" id="panel-hotlines">
+          <div class="table-header" style="border-radius:0;border-top:none">
+            <span class="table-title">客服热线</span>
+            <button class="btn btn-primary" onclick="openModal('addHotline')">＋ 添加热线</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>热线名称</th>
+                <th>电话号码</th>
+                <th>服务时间</th>
+                <th>类型</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>综合客服热线</td>
+                <td style="font-weight:600;font-family:monospace;font-size:14px">400-888-0001</td>
+                <td>工作日 09:00–21:00</td>
+                <td><span class="tag info">普通</span></td>
+                <td><span class="tag success">启用</span></td>
+                <td><button class="btn btn-sm btn-secondary">编辑</button></td>
+              </tr>
+              <tr>
+                <td>紧急事故专线</td>
+                <td style="font-weight:600;font-family:monospace;font-size:14px">400-888-0002</td>
+                <td>24 小时</td>
+                <td><span class="tag danger">紧急</span></td>
+                <td><span class="tag success">启用</span></td>
+                <td><button class="btn btn-sm btn-secondary">编辑</button></td>
+              </tr>
+              <tr>
+                <td>金融业务专线</td>
+                <td style="font-weight:600;font-family:monospace;font-size:14px">400-888-0003</td>
+                <td>工作日 09:00–18:00</td>
+                <td><span class="tag warning">专属</span></td>
+                <td><span class="tag success">启用</span></td>
+                <td><button class="btn btn-sm btn-secondary">编辑</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 系统设置 Panel -->
+        <div class="settings-panel" id="panel-sysset">
+          <div class="settings-body">
+            <div class="form-group">
+              <label class="form-label">AI 客服名称</label>
+              <input type="text" class="form-input" value="小象 · AI 客服">
+              <div class="form-hint">小程序端展示的 AI 昵称</div>
+            </div>
+            <!-- 客服头像上传 -->
+            <div class="form-group">
+              <label class="form-label">客服头像</label>
+              <div class="avatar-upload-row">
+                <div class="avatar-preview" id="avatarPreview">
+                  <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+                    <circle cx="40" cy="40" r="40" fill="#E8F8F5"/>
+                    <ellipse cx="40" cy="44" rx="22" ry="20" fill="#B2DFDB"/>
+                    <ellipse cx="40" cy="46" rx="17" ry="15" fill="#80CBC4"/>
+                    <circle cx="40" cy="44" r="10" fill="#4DB6AC"/>
+                    <circle cx="33" cy="36" r="4" fill="#263238"/>
+                    <circle cx="47" cy="36" r="4" fill="#263238"/>
+                    <circle cx="34" cy="35" r="1.5" fill="#fff"/>
+                    <circle cx="48" cy="35" r="1.5" fill="#fff"/>
+                    <ellipse cx="18" cy="34" rx="7" ry="9" fill="#B2DFDB"/>
+                    <ellipse cx="62" cy="34" rx="7" ry="9" fill="#B2DFDB"/>
+                    <ellipse cx="18" cy="34" rx="4" ry="6" fill="#FFCCBC"/>
+                    <ellipse cx="62" cy="34" rx="4" ry="6" fill="#FFCCBC"/>
+                    <path d="M40 48 Q40 56 35 60 Q33 62 34 60 Q37 55 40 53" fill="#4DB6AC"/>
+                    <path d="M40 48 Q40 56 45 60 Q47 62 46 60 Q43 55 40 53" fill="#4DB6AC"/>
+                    <line x1="40" y1="53" x2="40" y2="60" stroke="#26A69A" stroke-width="1.5"/>
+                  </svg>
+                </div>
+                <div class="avatar-upload-actions">
+                  <label class="btn btn-secondary btn-sm" for="avatarInput" style="cursor:pointer;display:inline-block">📤 上传头像</label>
+                  <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+                  <button class="btn btn-sm" onclick="resetAvatar()" style="background:#f0f0f0;border:1px solid var(--border);color:var(--text-secondary)">恢复默认</button>
+                  <div class="form-hint" style="margin-top:6px">支持 JPG / PNG，建议 200×200 像素，文件不超过 2MB</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">欢迎语</label>
+              <textarea class="form-textarea" style="min-height:72px">您好！我是大向智行 AI 客服小象，请问有什么可以帮您？</textarea>
+            </div>
+            <hr class="section-divider">
+            <div class="form-group">
+              <label class="form-label">会话超时时间</label>
+              <select class="form-select" style="max-width:200px">
+                <option>30 分钟</option>
+                <option selected>60 分钟</option>
+                <option>120 分钟</option>
+              </select>
+              <div class="form-hint">超过此时间空闲则自动结束会话</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">历史会话保存时长</label>
+              <select class="form-select" style="max-width:200px">
+                <option>7 天</option>
+                <option>30 天</option>
+                <option selected>90 天</option>
+                <option>180 天</option>
+                <option>1 年</option>
+              </select>
+              <div class="form-hint">超过保存时长后自动清理历史会话数据</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">敏感词过滤</label>
+              <textarea class="form-textarea" placeholder="每行一个敏感词">赌博
+暴力
+色情</textarea>
+              <div class="form-hint">用户输入含敏感词时触发拦截提示</div>
+            </div>
+            <hr class="section-divider">
+            <div class="form-group">
+              <label class="form-label">AI 接口地址</label>
+              <input type="text" class="form-input" placeholder="https://api.example.com/chat">
+            </div>
+            <div class="form-group">
+              <label class="form-label">API 密钥</label>
+              <input type="password" class="form-input" placeholder="已配置（点击修改）">
+            </div>
+            <div class="form-group">
+              <label class="form-label">知识库同步</label>
+              <div class="sync-info">
+                <div class="sync-info-text">上次同步：<strong>2026-03-30 09:00</strong> &nbsp;·&nbsp; 状态：<span style="color:var(--brand-success)">●</span> 同步成功</div>
+                <button class="btn btn-secondary btn-sm">立即同步</button>
+              </div>
+              <div class="form-hint">同步后 AI 会更新知识库索引，大文档可能需要几分钟</div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;margin-top:8px">保存设置</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<!-- ===== Modal: 添加问答 ===== -->
+<div class="modal-overlay" id="modal-addQuestion">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">添加问答</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">问题标题 <span style="color:var(--brand-danger)">*</span></label>
+        <input type="text" class="form-input" id="questionTitle" placeholder="请输入用户可能提出的问题">
+      </div>
+
+      <!-- 标答 -->
+      <div class="form-group">
+        <label class="form-label">标准答案 <span style="color:var(--brand-danger)">*</span></label>
+        <textarea class="form-textarea" id="questionAnswer" placeholder="请输入 AI 的标准回答内容"></textarea>
+      </div>
+
+      <!-- 所属分类 -->
+      <div class="form-group">
+        <label class="form-label">所属分类 <span style="color:var(--brand-danger)">*</span></label>
+        <select class="form-select">
+          <option value="">请选择分类</option>
+          <option>🦺 安全培训</option>
+          <option>🛡️ 保险业务</option>
+          <option selected>🏦 银行贷款</option>
+          <option>🚛 车队管理</option>
+          <option>🔧 车后市场</option>
+          <option>📋 政策解读</option>
+        </select>
+        <div class="form-hint">分类来源于「分类管理」，可前往管理页新增或调整</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">启用状态</label>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        <span style="font-size:13px;color:var(--text-secondary);margin-left:10px">启用后该问答参与 AI 匹配</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="closeModal()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: 上传文档 ===== -->
+<div class="modal-overlay" id="modal-uploadDoc">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">上传知识库文档</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="border:2px dashed var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;cursor:pointer;background:var(--bg-page);margin-bottom:16px" onmouseover="this.style.borderColor='var(--brand-accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:40px;margin-bottom:10px">📤</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px">点击或拖拽文件到此处上传</div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.6">支持批量上传，单文件最大 50 MB</div>
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px">
+          <span style="font-size:11px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);padding:3px 10px;border-radius:100px">.doc/.docx</span>
+          <span style="font-size:11px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);padding:3px 10px;border-radius:100px">.pdf</span>
+          <span style="font-size:11px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);padding:3px 10px;border-radius:100px">.md</span>
+          <span style="font-size:11px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);padding:3px 10px;border-radius:100px">.ppt/.pptx</span>
+          <span style="font-size:11px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);padding:3px 10px;border-radius:100px">.xls/.xlsx</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">所属分类</label>
+        <select class="form-select">
+          <option value="">请选择分类</option>
+          <option>🦺 安全培训</option>
+          <option>🛡️ 保险业务</option>
+          <option>🏦 银行贷款</option>
+          <option>🚛 车队管理</option>
+          <option>🔧 车后市场</option>
+          <option>📋 政策解读</option>
+        </select>
+        <div class="form-hint">分类用于帮助 AI 在匹配相关问题时优先检索对应文档</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="closeModal()">开始上传</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: 查找文档 ===== -->
+<div class="modal-overlay" id="modal-searchDoc">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <span class="modal-title">🔎 查找知识库文档</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:12px">
+        <div style="display:flex;gap:8px">
+          <input type="text" class="form-input" placeholder="输入文档名称、关键词...">
+          <button class="btn btn-primary" style="flex-shrink:0">搜索</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <select class="form-select" style="width:auto;padding:8px 12px">
+          <option>全部格式</option>
+          <option>PDF</option>
+          <option>Word</option>
+          <option>Excel</option>
+          <option>PPT</option>
+          <option>Markdown</option>
+        </select>
+        <select class="form-select" style="width:auto;padding:8px 12px">
+          <option>全部分类</option>
+          <option>安全培训</option>
+          <option>保险业务</option>
+          <option>银行贷款</option>
+          <option>车队管理</option>
+          <option>车后市场</option>
+          <option>政策解读</option>
+        </select>
+        <select class="form-select" style="width:auto;padding:8px 12px">
+          <option>全部状态</option>
+          <option>已就绪</option>
+          <option>处理中</option>
+          <option>处理失败</option>
+        </select>
+      </div>
+      <!-- 搜索结果 -->
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="doc-item">
+          <div class="doc-icon">📄</div>
+          <div class="doc-info">
+            <div class="doc-name">保险理赔操作手册V2.pdf</div>
+            <div class="doc-meta">
+              <span class="doc-meta-item">📎 PDF · 2.3 MB</span>
+              <span class="doc-meta-item"><span class="status-dot ready"></span>已就绪</span>
+            </div>
+            <div class="doc-tags"><span class="doc-tag">保险业务</span></div>
+          </div>
+          <div class="doc-actions">
+            <button class="btn btn-sm btn-secondary">预览</button>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">📊</div>
+          <div class="doc-info">
+            <div class="doc-name">2026安全培训课程目录.xlsx</div>
+            <div class="doc-meta">
+              <span class="doc-meta-item">📎 Excel · 0.8 MB</span>
+              <span class="doc-meta-item"><span class="status-dot ready"></span>已就绪</span>
+            </div>
+            <div class="doc-tags"><span class="doc-tag">安全培训</span></div>
+          </div>
+          <div class="doc-actions">
+            <button class="btn btn-sm btn-secondary">下载</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: 新增分类 ===== -->
+<div class="modal-overlay" id="modal-addTag">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">新增分类</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">分类名称 <span style="color:var(--brand-danger)">*</span></label>
+        <input type="text" class="form-input" placeholder="如：安全培训">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">图标</label>
+          <select class="form-select">
+            <option>🦺 安全培训类</option>
+            <option>🛡️ 保险类</option>
+            <option>🏦 金融/贷款类</option>
+            <option>🚛 车队/运输类</option>
+            <option>🔧 维修/车后类</option>
+            <option>📋 政策/法规类</option>
+            <option>📦 调度/物流类</option>
+            <option>💬 通用客服类</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">排序权重</label>
+          <input type="number" class="form-input" value="0" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">移动端展示</label>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        <span style="font-size:13px;color:var(--text-secondary);margin-left:10px">在移动端客服首页显示该分类入口</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">启用状态</label>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        <span style="font-size:13px;color:var(--text-secondary);margin-left:10px">启用后可在问答和知识库中关联</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="closeModal()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: 添加热线 ===== -->
+<div class="modal-overlay" id="modal-addHotline">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">添加客服热线</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">热线名称 <span style="color:var(--brand-danger)">*</span></label>
+        <input type="text" class="form-input" placeholder="如：综合客服热线">
+      </div>
+      <div class="form-group">
+        <label class="form-label">电话号码 <span style="color:var(--brand-danger)">*</span></label>
+        <input type="text" class="form-input" placeholder="如：400-888-0001">
+      </div>
+      <div class="form-group">
+        <label class="form-label">服务时间</label>
+        <input type="text" class="form-input" placeholder="如：工作日 09:00-21:00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">类型</label>
+        <select class="form-select">
+          <option>普通</option>
+          <option>紧急</option>
+          <option>专属</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">启用状态</label>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        <span style="font-size:13px;color:var(--text-secondary);margin-left:10px">小程序热线弹窗中显示</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="closeModal()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Modal: 会话详情 ===== -->
+<div class="modal-overlay" id="modal-chatDetail">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <span class="modal-title">会话详情 · 20260330001</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div style="background:var(--bg-page);padding:12px 20px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-muted);display:flex;gap:20px">
+        <span>用户：用户***8</span>
+        <span>状态：<span class="tag success">已解决</span></span>
+        <span>耗时：1m 23s</span>
+        <span>时间：2026-03-30 09:42</span>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;max-height:400px;overflow-y:auto">
+        <div style="display:flex;justify-content:flex-end">
+          <div style="max-width:70%;background:var(--brand-accent);color:#fff;padding:10px 14px;border-radius:12px 12px 2px 12px;font-size:13px;line-height:1.5">保险理赔流程是怎样的？</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--brand-accent),var(--brand-teal));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div>
+          <div style="max-width:75%;background:#fff;border:1px solid var(--border);padding:10px 14px;border-radius:2px 12px 12px 12px;font-size:13px;line-height:1.6;color:var(--text-primary)">
+            您好！保险理赔的完整流程如下：<br>
+            1️⃣ <strong>报案</strong>：事故发生后 48 小时内致电客服<br>
+            2️⃣ <strong>现场取证</strong>：拍摄现场照片、行车记录等<br>
+            3️⃣ <strong>提交材料</strong>：理赔申请书、证件复印件等<br>
+            4️⃣ <strong>定损核查</strong>：保险公司 3-5 个工作日内完成<br>
+            5️⃣ <strong>赔款到账</strong>：审核通过后 7 个工作日内到账
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <div style="max-width:70%;background:var(--brand-accent);color:#fff;padding:10px 14px;border-radius:12px 12px 2px 12px;font-size:13px;line-height:1.5">需要什么材料？</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--brand-accent),var(--brand-teal));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div>
+          <div style="max-width:75%;background:#fff;border:1px solid var(--border);padding:10px 14px;border-radius:2px 12px 12px 12px;font-size:13px;line-height:1.6;color:var(--text-primary)">
+            理赔所需材料：身份证、驾驶证、行驶证、事故现场照片、维修发票，以及填写完整的理赔申请表。
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== 面包屑映射 =====
+  const breadMap = {
+    home:         { m: '大向智行', sep2: '', sub: '', sep3: '', title: '首页' },
+    archive:      { m: '大向智行', sep2: '', sub: '', sep3: '', title: '基础档案' },
+    training:     { m: '大向智行', sep2: '', sub: '', sep3: '', title: '安全培训' },
+    dispatch:     { m: '大向智行', sep2: '', sub: '', sep3: '', title: '运单调度' },
+    companyInfo:  { m: '企业管理', sep2: '›', sub: '', sep3: '', title: '企业信息' },
+    companyUser:  { m: '企业管理', sep2: '›', sub: '', sep3: '', title: '人员管理' },
+    questions:    { m: '智能客服', sep2: '›', sub: '', sep3: '', title: '问答管理' },
+    knowledge:    { m: '智能客服', sep2: '›', sub: '', sep3: '', title: '知识库管理' },
+    tags:         { m: '智能客服', sep2: '›', sub: '', sep3: '', title: '分类管理' },
+    conversations:{ m: '智能客服', sep2: '›', sub: '', sep3: '', title: '会话记录' },
+    settings:     { m: '智能客服', sep2: '›', sub: '', sep3: '', title: '客服设置' },
+    finance:      { m: '大向智行', sep2: '', sub: '', sep3: '', title: '财务管理' },
+    datascreen:   { m: '大向智行', sep2: '', sub: '', sep3: '', title: '数据大屏' },
+  };
+
+  function showScreen(id, el) {
+    // 更新 active 状态
+    document.querySelectorAll('.nav-item-l1,.nav-item-l2').forEach(n => {
+      if (n !== el) n.classList.remove('active');
+    });
+    if (el) el.classList.add('active');
+
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+
+    // 面包屑
+    const b = breadMap[id] || { m: '', sep2: '', sub: '', sep3: '', title: id };
+    document.getElementById('breadModule').textContent  = b.m;
+    document.getElementById('breadSep2').textContent    = b.sep2;
+    document.getElementById('breadSub').textContent     = b.sub;
+    document.getElementById('breadSep3').textContent    = b.sep3;
+    document.getElementById('pageTitle').textContent    = b.title;
+  }
+
+  // 切换一级菜单折叠（含智能客服）
+  function toggleL1(key) {
+    const el = document.getElementById('l1-' + key);
+    const sub = document.getElementById('sub-' + key);
+    if (!sub) return;
+    const open = sub.classList.contains('open');
+    sub.classList.toggle('open', !open);
+    el.classList.toggle('open', !open);
+  }
+
+  function showSettingsTab(tab, el) {
+    document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+
+  function openModal(id) {
+    document.getElementById('modal-' + id).classList.add('open');
+  }
+
+  function closeModal() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+  });
+
+  // ===== 会话记录日期过滤 =====
+  function filterConvByDate() {
+    const start = document.getElementById('dateStart').value;
+    const end   = document.getElementById('dateEnd').value;
+    const rows  = document.querySelectorAll('#convTableBody tr');
+    rows.forEach(row => {
+      const d = row.getAttribute('data-date') || '';
+      const show = (!start || d >= start) && (!end || d <= end);
+      row.style.display = show ? '' : 'none';
+    });
+  }
+
+  // ===== 分类列表搜索 =====
+  function filterTags(keyword) {
+    const rows = document.querySelectorAll('#tagTableBody tr');
+  rows.forEach(row => {
+    const name = row.getAttribute('data-name') || '';
+    row.style.display = name.includes(keyword) ? '' : 'none';
+  });
+}
+
+/* 客服头像预览与重置 */
+function previewAvatar(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if (file.size > 2 * 1024 * 1024) {
+    alert('头像文件不能超过 2MB');
+    input.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const preview = document.getElementById('avatarPreview');
+    preview.innerHTML = `<img src="${e.target.result}" alt="客服头像">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetAvatar() {
+  document.getElementById('avatarInput').value = '';
+  document.getElementById('avatarPreview').innerHTML = `
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+      <circle cx="40" cy="40" r="40" fill="#E8F8F5"/>
+      <ellipse cx="40" cy="44" rx="22" ry="20" fill="#B2DFDB"/>
+      <ellipse cx="40" cy="46" rx="17" ry="15" fill="#80CBC4"/>
+      <circle cx="40" cy="44" r="10" fill="#4DB6AC"/>
+      <circle cx="33" cy="36" r="4" fill="#263238"/>
+      <circle cx="47" cy="36" r="4" fill="#263238"/>
+      <circle cx="34" cy="35" r="1.5" fill="#fff"/>
+      <circle cx="48" cy="35" r="1.5" fill="#fff"/>
+      <ellipse cx="18" cy="34" rx="7" ry="9" fill="#B2DFDB"/>
+      <ellipse cx="62" cy="34" rx="7" ry="9" fill="#B2DFDB"/>
+      <ellipse cx="18" cy="34" rx="4" ry="6" fill="#FFCCBC"/>
+      <ellipse cx="62" cy="34" rx="4" ry="6" fill="#FFCCBC"/>
+      <path d="M40 48 Q40 56 35 60 Q33 62 34 60 Q37 55 40 53" fill="#4DB6AC"/>
+      <path d="M40 48 Q40 56 45 60 Q47 62 46 60 Q43 55 40 53" fill="#4DB6AC"/>
+      <line x1="40" y1="53" x2="40" y2="60" stroke="#26A69A" stroke-width="1.5"/>
+    </svg>`;
+}
+</script>
+
+</body>
+</html>
